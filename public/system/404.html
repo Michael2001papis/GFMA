@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | GFMA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .error-container {
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .icon {
+            font-size: 6rem;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: white;
+            color: #1e3a8a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+    <!-- SPA Routing: Redirect to main app -->
+    <script>
+        // For GitHub Pages: redirect any 404 to the main SPA
+        // This ensures the SPA handles routing
+        if (window.location.pathname !== '/') {
+            window.location.replace('/');
+        }
+    </script>
+</head>
+<body>
+    <div class="error-container">
+        <div class="icon">🔍</div>
+        <h1>404</h1>
+        <h2>Page Not Found</h2>
+        <p>The page you're looking for doesn't exist or has been moved.</p>
+        <p class="footer-hebrew" style="font-size: 1rem; opacity: 0.9;">הדף שביקשת לא נמצא או הועבר</p>
+        <a href="/" class="btn">Go to Homepage / חזור לעמוד הבית</a>
+    </div>
+</body>
+</html>

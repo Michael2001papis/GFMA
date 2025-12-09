@@ -1,0 +1,111 @@
+# ============================================
+# GFMA - Git Ignore File
+# ============================================
+# This file prevents unwanted files from being uploaded to GitHub
+# It does NOT affect your website or code functionality
+
+# ============================================
+# Operating System Files
+# ============================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+
+# ============================================
+# IDE / Editor Files
+# ============================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# ============================================
+# Environment & Config Files (Sensitive)
+# ============================================
+.env
+.env.local
+.env.*.local
+*.env
+config.local.js
+secrets.json
+
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# ============================================
+# Build & Temporary Files
+# ============================================
+# Build outputs
+dist/
+build/
+*.min.js.map
+*.min.css.map
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+.cache/
+
+# ============================================
+# Backup Files
+# ============================================
+*.bak
+*.backup
+*.old
+*~
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+.nyc_output/
+*.test.js.snap
+
+# ============================================
+# Git
+# ============================================
+# (Git files are usually tracked, but just in case)
+*.orig
+
+# ============================================
+# Project Specific
+# ============================================
+# Add any project-specific files/folders here
+# For example:
+# /public/uploads/
+# /private/
+

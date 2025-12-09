@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>רפואה ידידותית - המקום לשאול, להבין, ולא להתבייש</title>
+    <meta name="description" content="רפואה ידידותית - אתר דמו לתרגול והדגמה. מערכת חיפוש רופאים לצורכי לימוד בלבד. לא לשימוש ציבורי.">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="public/css/style.css">
+</head>
+<body>
+    <!-- Welcome Modal -->
+    <div id="welcome-modal" class="welcome-modal" style="display: none;" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <!-- Close Confirmation Modal -->
+            <div id="close-confirmation-modal" class="close-confirmation-modal" style="display: none;">
+                <div class="confirmation-content">
+                    <p class="confirmation-text">האם אתה בטוח? הנתונים שהזנת יאבדו.</p>
+                    <div class="confirmation-actions">
+                        <button type="button" class="btn btn-secondary" id="confirm-close-btn">כן, סגור</button>
+                        <button type="button" class="btn btn-primary" id="cancel-close-btn">ביטול</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">ברוכים הבאים ל'רפואה ידידותית'</h2>
+                <p class="modal-subtitle">כדי להתאים עבורך רופאים בסביבה שלך, בחר קופת חולים והמיקום שלך.</p>
+            </div>
+            
+            <form id="welcome-form" class="modal-form">
+                <div class="form-group">
+                    <label for="health-fund-select" class="field-label">
+                        <span class="field-icon">🏥</span>
+                        קופת חולים *
+                    </label>
+                    <div class="field-wrapper">
+                        <select id="health-fund-select" name="healthFund" required aria-required="true" aria-describedby="error-health-fund hint-health-fund">
+                            <option value="">בחר קופת חולים</option>
+                            <option value="כללית">כללית</option>
+                            <option value="מכבי">מכבי</option>
+                            <option value="מאוחדת">מאוחדת</option>
+                            <option value="לאומית">לאומית</option>
+                            <option value="אין קופת חולים / פרטי">אין קופת חולים / פרטי</option>
+                        </select>
+                        <span class="status-icon" id="status-health-fund" aria-hidden="true"></span>
+                    </div>
+                    <span class="field-hint" id="hint-health-fund"></span>
+                    <span class="error-message" id="error-health-fund"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-location-input" class="field-label">
+                        <span class="field-icon">📍</span>
+                        מיקום (עיר / שכונה / אזור) *
+                    </label>
+                    <div class="field-wrapper">
+                        <input 
+                            type="text" 
+                            id="user-location-input" 
+                            name="userLocation" 
+                            placeholder="למשל: תל אביב, חולון, בת ים..."
+                            required
+                            aria-required="true"
+                            aria-describedby="error-user-location hint-user-location"
+                        >
+                        <span class="status-icon" id="status-user-location" aria-hidden="true"></span>
+                    </div>
+                    <span class="field-hint" id="hint-user-location"></span>
+                    <span class="error-message" id="error-user-location"></span>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary btn-large">המשך</button>
+                    <button type="button" class="btn btn-secondary" id="skip-as-guest">דלג והמשך כאורח</button>
+                </div>
+                
+                <div class="modal-divider">
+                    <span>או</span>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" id="create-user-btn">יצירת משתמש חדש</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header" class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>⚕️ רפואה ידידותית</h1>
+                </div>
+                <button id="theme-toggle" class="theme-toggle" aria-label="החלף מצב תצוגה" aria-pressed="false" title="החלף בין מצב בהיר לכהה">🌙</button>
+                <nav class="main-nav" id="main-nav">
+                    <button class="nav-toggle" id="nav-toggle" aria-label="תפריט">☰</button>
+                    <ul class="nav-menu" id="nav-menu">
+                        <li><a href="#home" class="nav-link" data-section="home">דף הבית</a></li>
+                        <li><a href="#doctors" class="nav-link" data-section="doctors">חיפוש רופאים</a></li>
+                        <li><a href="#pricing" class="nav-link" data-section="pricing">מי עושה מה וכמה זה עולה?</a></li>
+                        <li><a href="#ask-doctor" class="nav-link" data-section="ask-doctor">שאלה לרופא!</a></li>
+                        <li><a href="#contact" class="nav-link" data-section="contact">יצירת קשר</a></li>
+                    <li><a href="#about" class="nav-link" data-section="about">אודות</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="container">
+                <div class="home-content">
+                    <h2>רפואה ידידותית — בריאות. אנושיות. טכנולוגיה.</h2>
+                    <p class="lead">
+                        אתר דמו המדגים מערכת חיפוש רופאים לצורכי לימוד והמחשה בלבד.
+                    </p>
+                    <p>
+                        האתר נוצר כפרויקט תרגול להמחשה של ממשק משתמש וחיפוש רופאים.
+                    </p>
+                    <p class="demo-banner">
+                        <strong>שימו לב:</strong> האתר הוא אתר דמו והנתונים בו פיקטיביים לצורכי תרגול בלבד.
+                        האתר אינו מהווה שירות רפואי אמיתי ואינו מיועד לשימוש ציבורי.
+                    </p>
+                    <button class="btn btn-primary btn-large" id="go-to-doctors">התחל חיפוש רופאים</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Doctors Section -->
+        <section id="doctors" class="section">
+            <div class="container">
+                <h2 class="section-title">חיפוש רופאים</h2>
+                
+                <p class="section-intro" style="max-width: 800px; margin: 0 auto 2rem; text-align: center; line-height: 1.8; color: var(--text-light);">
+                    מערכת דמו המדגימה חיפוש רופאים. תוכל לחפש רופאים גם בחיפוש כללי וגם בחיפוש ספציפי לפי תחום.<br>
+                    החיפוש הכללי מתאים כשלא בטוחים בדיוק מה צריך,<br>
+                    והחיפוש הספציפי מתאים כשכבר יודעים איזה סוג מומחה מחפשים.<br>
+                    <em style="font-size: 0.9em; color: var(--text-muted);">כל הנתונים באתר פיקטיביים ולצורכי הדגמה בלבד.</em>
+                </p>
+                
+                <!-- Search Area -->
+                <div class="search-area">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="doctor-search-input" 
+                            class="search-input" 
+                            placeholder="חפש רופא לפי שם, התמחות, עיר או תגיות..."
+                            aria-label="חיפוש רופאים"
+                            aria-live="polite"
+                        >
+                        <button id="doctor-search-btn" class="btn btn-primary">חיפוש</button>
+                    </div>
+                    
+                    <!-- Location Filter Toggle (only for registered users) -->
+                    <div id="location-filter-toggle-container" class="location-filter-toggle" style="display: none;">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="location-filter-toggle" checked>
+                            <span class="toggle-text">הצג רק רופאים באזור שלי</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Expand Search Message -->
+                    <div id="expand-search-message" class="expand-search-message" style="display: none;">
+                        <p>לא נמצאו רופאים תואמים באזור שלך.</p>
+                        <button type="button" class="btn btn-outline btn-small" id="expand-search-btn">
+                            הרחב חיפוש לכל הארץ
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Count -->
+                <div id="results-count" class="results-count" style="display: none;" aria-live="polite" aria-atomic="true">
+                    <span class="results-count-text">מחפש...</span>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="doctors-loading" class="doctors-loading" style="display: none;" aria-label="טוען תוצאות..." aria-busy="true">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">מחפש רופאים...</p>
+                </div>
+
+                <!-- Doctors List -->
+                <div id="doctors-list" class="doctors-list">
+                    <!-- Doctors cards will be rendered here by JavaScript -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="doctors-empty" class="empty-state" style="display: none;">
+                    <div id="no-results-message">
+                        <p class="no-results-text">לא נמצאו רופאים מתאימים לחיפוש שלך.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section">
+            <div class="container">
+                <h2 class="section-title">מי עושה מה — וכמה זה עולה?</h2>
+                
+                <p class="section-intro" style="max-width: 800px; margin: 0 auto 2rem; text-align: center; line-height: 1.8; color: var(--text-light);">
+                    מחירים לדוגמה בלבד — כל הנתונים פיקטיביים לצורכי המחשה. 
+                    המטרה היא להציג טווחי מחירים בצורה שקופה ופשוטה, כדי להדגים איך נראית מערכת כזו.
+                </p>
+                
+                <div class="pricing-list">
+                    <div class="pricing-item">
+                        <h3>מי יכול לפענח בדיקות?</h3>
+                        <p>טווח מחירים: 250–500 ₪</p>
+                    </div>
+                    
+                    <div class="pricing-item">
+                        <h3>מי יכול להסביר תוצאות?</h3>
+                        <p>כ-100 ₪ להסבר קצר וממוקד</p>
+                    </div>
+                    
+                    <div class="pricing-item">
+                        <h3>מי יכול לענות על שאלה רפואית כללית?</h3>
+                        <p>סביב 100 ₪ לשאלה קצרה</p>
+                    </div>
+                </div>
+                
+                <p style="max-width: 800px; margin: 3rem auto 0; text-align: center; font-size: 0.95rem; color: var(--text-muted); font-style: italic;">
+                    המחירים משוערים בלבד ועשויים להשתנות לפי היקף המקרה והרופא המטפל.
+                </p>
+            </div>
+        </section>
+
+        <!-- Ask Doctor Section -->
+        <section id="ask-doctor" class="section">
+            <div class="container">
+                <h2 class="section-title">שאלה לרופא!</h2>
+                
+                <p class="section-intro" style="max-width: 800px; margin: 0 auto 2rem; text-align: center; line-height: 1.8; color: var(--text-light);">
+                    שאלות רפואיות לדוגמה לצורכי המחשה בלבד. 
+                    הרבה אנשים מתלבטים אם לפנות למיון, להישאר בבית או לקבוע תור לרופא. 
+                    כאן אנחנו מציגים דוגמאות לשאלות שאפשר לשאול ולהבין טוב יותר את המצב — בלי להתבייש.
+                </p>
+                
+                <div class="questions-list">
+                    <div class="question-item">
+                        <p>יש לי סימנים כאלה וכאלה – להישאר בבית או לפנות למיון?</p>
+                    </div>
+                    
+                    <div class="question-item">
+                        <p>יש לי חום גבוה – ללכת למיון או להישאר בבית?</p>
+                    </div>
+                    
+                    <div class="question-item">
+                        <p>לאיזה סוג רופא בכלל כדאי לפנות במקרה שלי?</p>
+                    </div>
+                    
+                    <div class="question-item">
+                        <p>זה מצב דחוף או שאפשר להמתין לרופא משפחה?</p>
+                    </div>
+                </div>
+                
+                <div class="medical-disclaimer">
+                    <p class="disclaimer-text">
+                        <strong>הבהרה חשובה:</strong> המידע באתר הוא כללי בלבד ואינו מהווה תחליף לייעוץ רפואי אישי או לפנייה דחופה במקרי חירום.
+                    </p>
+                    <p class="disclaimer-text">
+                        המידע באתר הינו כללי בלבד ואינו מהווה תחליף לייעוץ רפואי מקצועי.
+                    </p>
+                    <p class="disclaimer-text">
+                        בכל מצב רפואי דחוף יש לפנות למיון או לרופא מוסמך.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <div class="container">
+                <h2 class="section-title">יצירת קשר (טופס דמו)</h2>
+                <p class="section-intro" style="max-width: 800px; margin: 0 auto 2rem; text-align: center; line-height: 1.8; color: var(--text-light);">
+                    טופס לדוגמה בלבד — אינו שולח הודעות אמיתיות. לצורכי הדגמה ותרגול בלבד.
+                </p>
+                <form id="contact-form" class="contact-form">
+                    <div class="form-group">
+                        <label for="full-name">שם מלא *</label>
+                        <input 
+                            type="text" 
+                            id="full-name" 
+                            name="full-name" 
+                            required
+                            aria-required="true"
+                        >
+                        <span class="error-message" id="error-full-name"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">טלפון *</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            required
+                            pattern="[0-9]{9,10}"
+                            aria-required="true"
+                        >
+                        <span class="error-message" id="error-phone"></span>
+                        <small class="form-hint">נא להזין מספר טלפון תקין (9-10 ספרות)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">דוא"ל</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email"
+                            aria-label="דואר אלקטרוני (לא חובה)"
+                        >
+                        <span class="error-message" id="error-email"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">נושא *</label>
+                        <select id="subject" name="subject" required aria-required="true">
+                            <option value="">בחר נושא</option>
+                            <option value="new-appointment">תור חדש</option>
+                            <option value="medical-question">שאלה רפואית כללית</option>
+                            <option value="second-opinion">חוות דעת נוספת</option>
+                            <option value="home-visit">ביקור בית</option>
+                            <option value="other">אחר</option>
+                        </select>
+                        <span class="error-message" id="error-subject"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">הודעה</label>
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            rows="5"
+                            aria-label="הודעה (לא חובה)"
+                        ></textarea>
+                    </div>
+
+                    <div id="form-success" class="success-message" style="display: none;">
+                        ✅ הודעתכם נשלחה בהצלחה! נחזור אליכם בהקדם.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">שלח הודעה</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section">
+            <div class="container">
+                <h2 class="section-title">אודות האתר והצהרת שימוש</h2>
+                
+                <div class="about-content">
+                    <div class="legal-notice">
+                        <p class="legal-text">
+                            האתר 'רפואה ידידותית' הוא אתר דמו ותרגול שנועד להמחשה בלבד.
+                        </p>
+                        <p class="legal-text">
+                            האתר אינו מיועד לשימוש ציבורי או להפצה פומבית.
+                        </p>
+                        <p class="legal-text">
+                            המידע, הרופאים, המחירים והקטגוריות באתר משמשים למטרות תרגול בלבד.
+                        </p>
+                        <p class="legal-text">
+                            אין לראות בתוכן האתר ייעוץ רפואי, אבחון או המלצה.
+                        </p>
+                        <p class="legal-text">
+                            כל הזכויות על מבנה האתר, הקוד והתוכן שמורות למפתח האתר בלבד.
+                        </p>
+                        <p class="legal-text">
+                            אין להעתיק, להפיץ או להשתמש בתוכן האתר לכל מטרה אחרת.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-copyright">
+                <p class="copyright-line">&copy; 2025 מיכאל פפיסמדוב — כל הזכויות שמורות.</p>
+                <p class="demo-notice">האתר 'רפואה ידידותית' נוצר לצורכי לימוד, תרגול והדגמה בלבד ואינו מיועד לשימוש ציבורי.</p>
+                <p class="demo-notice">האתר אינו מהווה מערכת רפואית אמיתית או פלטפורמה לשירות רפואי פעיל.</p>
+            </div>
+            <div class="main-footer-links">
+                <a href="#contact">יצירת קשר</a>
+                <a href="#ask-doctor">שאלות נפוצות</a>
+                <a href="#pricing">מחירון שירותים</a>
+                <a href="#about">אודות האתר</a>
+            </div>
+            <p class="footer-disclaimer">
+                המידע באתר הוא כללי בלבד ואינו מהווה תחליף לייעוץ רפואי אישי
+            </p>
+            <div class="footer-signature">
+                <p>
+                    <span class="footer-signature-icon">💻</span>
+                    עיצוב ופיתוח: מיכאל פפיסמדוב — פרויקט אישי ייחודי
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot -->
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="פתח עוזר באתר" title="עוזר באתר">
+        💬
+    </button>
+
+    <div id="chatbot-container" class="chatbot-container" aria-hidden="true" role="dialog" aria-labelledby="chatbot-header-title">
+        <div class="chatbot-header">
+            <div class="chatbot-header-content">
+                <div class="chatbot-header-title" id="chatbot-header-title">עוזר רפואי ידידותי</div>
+                <div class="chatbot-header-subtitle">כאן כדי להדריך אותך באתר</div>
+            </div>
+            <button class="chatbot-close" id="chatbot-close" aria-label="סגור צ'אט">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages" role="log" aria-live="polite" aria-atomic="false">
+            <!-- הודעות יופיעו כאן -->
+        </div>
+        <div class="chatbot-input-area">
+            <input 
+                id="chatbot-input"
+                type="text"
+                placeholder="כתוב מה אתה מחפש... (לדוגמה: איך למצוא רופא ילדים)"
+                aria-label="כתוב הודעה"
+            />
+            <button id="chatbot-send" aria-label="שלח הודעה">שלח</button>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="public/js/app.js"></script>
+</body>
+</html>
