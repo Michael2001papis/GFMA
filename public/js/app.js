@@ -929,8 +929,60 @@ function initNavigation() {
     const navMenu = document.getElementById('nav-menu');
     
     if (navToggle && navMenu) {
+        const navBackdrop = document.getElementById('nav-backdrop');
+        
+        // לחיצה על כפתור ההמבורגר
         navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+            const isOpen = navMenu.classList.contains('active');
+            
+            if (isOpen) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        });
+        
+        // סגירה בלחיצה על backdrop
+        if (navBackdrop) {
+            navBackdrop.addEventListener('click', () => {
+                if (navMenu.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+        }
+        
+        // סגירה בלחיצה על קישור בתפריט
+        const navLinks = navMenu.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                // סגירה עם delay קטן לאנימציה חלקה
+                setTimeout(() => {
+                    closeMobileMenu();
+                }, 150);
+            });
+        });
+        
+        // סגירה ב-ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+        
+        // סגירה בעת שינוי גודל חלון (אם חוזר לדסקטופ)
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768 && navMenu.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            }, 100);
+        });
+        
+        // מניעת סגירה בלחיצה בתוך התפריט
+        navMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     }
     
@@ -963,11 +1015,69 @@ function showSection(sectionName) {
     }
 }
 
+// פונקציות גלובליות לניהול תפריט מובייל (Drawer)
+function openMobileMenu() {
+    const navMenu = document.getElementById('nav-menu');
+    const navToggle = document.getElementById('nav-toggle');
+    const navBackdrop = document.getElementById('nav-backdrop');
+    
+    if (navMenu && navToggle) {
+        // הוספת class active
+        navMenu.classList.add('active');
+        if (navBackdrop) {
+            navBackdrop.classList.add('active');
+            navBackdrop.setAttribute('aria-hidden', 'false');
+        }
+        
+        // עדכון aria
+        navToggle.setAttribute('aria-expanded', 'true');
+        navToggle.setAttribute('aria-label', 'סגור תפריט');
+        navToggle.textContent = '✕';
+        
+        // מניעת גלילה בגוף הדף כשהתפריט פתוח
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        
+        // העברת focus לקישור הראשון (נגישות)
+        setTimeout(() => {
+            const firstLink = navMenu.querySelector('.nav-link');
+            if (firstLink) {
+                firstLink.focus();
+            }
+        }, 100);
+    }
+}
+
 function closeMobileMenu() {
     const navMenu = document.getElementById('nav-menu');
+    const navToggle = document.getElementById('nav-toggle');
+    const navBackdrop = document.getElementById('nav-backdrop');
+    
     if (navMenu) {
         navMenu.classList.remove('active');
     }
+    
+    if (navBackdrop) {
+        navBackdrop.classList.remove('active');
+        navBackdrop.setAttribute('aria-hidden', 'true');
+    }
+    
+    if (navToggle) {
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.setAttribute('aria-label', 'תפריט');
+        navToggle.textContent = '☰';
+        
+        // החזרת focus לכפתור (נגישות)
+        setTimeout(() => {
+            navToggle.focus();
+        }, 100);
+    }
+    
+    // החזרת גלילה רגילה
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
 }
 
 // ============================================
