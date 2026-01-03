@@ -23,8 +23,8 @@
     }
   ],
   "categories": ["medical", "health", "lifestyle"],
-  "lang": "en",
-  "dir": "ltr",
+  "lang": "he",
+  "dir": "rtl",
   "prefer_related_applications": false
 }
 

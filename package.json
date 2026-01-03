@@ -7,8 +7,8 @@
     "start": "http-server . -p 8000 -o",
     "dev": "http-server . -p 8000 -o -c-1",
     "serve": "http-server . -p 8000",
-    "build": "echo '⚠️  זה לא מפעיל את האתר!' && echo '📝 כדי להפעיל את האתר, השתמש ב: npm start' && echo '✅ או: npm run dev'",
-    "preview": "http-server . -p 8000 -o"
+    "build": "node build.js",
+    "preview": "http-server dist -p 8000 -o"
   },
   "keywords": [
     "medical",
