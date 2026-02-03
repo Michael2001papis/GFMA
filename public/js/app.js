@@ -1927,67 +1927,83 @@ const CONTACT_EMAIL = 'dvnka2@gmail.com';
 
 function handleFormSubmit(e) {
     e.preventDefault();
-    console.log('📝 שליחת טופס...');
     
-    // איסוף נתונים
-    const formDataObj = {
-        fullName: getFieldValue('full-name'),
-        phone: getFieldValue('phone'),
-        email: getFieldValue('email'),
-        subject: getFieldValue('subject'),
-        message: getFieldValue('message')
-    };
-    
-    // ולידציה
-    if (!validateForm(formDataObj)) {
-        console.log('❌ ולידציה נכשלה');
-        return;
-    }
-    
-    const submitBtn = document.querySelector('#contact-form button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.textContent : '';
-    
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'שולח...';
-    }
-    
-    // הכנת נתונים לשליחה (FormSubmit.co)
-    const formData = new FormData();
-    formData.append('_subject', `פנייה חדשה מרפואה ידידותית - ${getSubjectLabel(formDataObj.subject)}`);
-    formData.append('שם מלא', formDataObj.fullName);
-    formData.append('טלפון', formDataObj.phone);
-    formData.append('דוא"ל', formDataObj.email || '(לא צוין)');
-    formData.append('נושא', getSubjectLabel(formDataObj.subject));
-    formData.append('הודעה', formDataObj.message || '(לא צוין)');
-    formData.append('_template', 'box');
-    formData.append('_captcha', 'false');
-    
-    fetch(`https://formsubmit.co/ajax/${CONTACT_EMAIL}`, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success === 'true') {
-                showSuccessMessage();
-                clearForm();
-                console.log('✅ טופס נשלח בהצלחה');
-            } else {
-                throw new Error(data.message || 'שגיאה בשליחה');
-            }
+    try {
+        console.log('📝 שליחת טופס...');
+        
+        const form = document.getElementById('contact-form');
+        if (!form) return;
+        
+        const formDataObj = {
+            fullName: getFieldValue('full-name'),
+            phone: getFieldValue('phone'),
+            email: getFieldValue('email'),
+            subject: getFieldValue('subject'),
+            message: getFieldValue('message')
+        };
+        
+        if (!validateForm(formDataObj)) {
+            showToast('נא למלא את כל השדות המסומנים ב-*', 'error');
+            return;
+        }
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.textContent : '';
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שולח...';
+        }
+        
+        // FormSubmit: המייל ב-URL חייב להיות מקודד (אין @ גולמי)
+        const formSubmitUrl = `https://formsubmit.co/ajax/${encodeURIComponent(CONTACT_EMAIL)}`;
+        
+        const payload = {
+            _subject: `פנייה חדשה מרפואה ידידותית - ${getSubjectLabel(formDataObj.subject)}`,
+            'שם מלא': formDataObj.fullName,
+            'טלפון': formDataObj.phone,
+            'דוא"ל': formDataObj.email || '(לא צוין)',
+            'נושא': getSubjectLabel(formDataObj.subject),
+            'הודעה': formDataObj.message || '(לא צוין)',
+            _template: 'box',
+            _captcha: 'false'
+        };
+        
+        fetch(formSubmitUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
         })
-        .catch(err => {
-            console.error('❌ שגיאה בשליחת טופס:', err);
-            showToast('שגיאה בשליחת ההודעה. נא לנסות שוב או ליצור קשר ישירות במייל.', 'error');
-        })
-        .finally(() => {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalBtnText;
-            }
-        });
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success === 'true' || data.success === true) {
+                    showSuccessMessage();
+                    clearForm();
+                    showToast('הודעתכם נשלחה בהצלחה!', 'success');
+                } else {
+                    throw new Error(data.message || 'שגיאה בשליחה');
+                }
+            })
+            .catch(err => {
+                console.error('❌ שגיאה בשליחת טופס:', err);
+                showToast('שגיאה בשליחת ההודעה. נא לנסות שוב או לשלוח מייל ישירות.', 'error');
+            })
+            .finally(() => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
+                }
+            });
+    } catch (err) {
+        console.error('❌ שגיאה בטופס יצירת קשר:', err);
+        showToast('אירעה שגיאה. נא לבדוק את השדות ולנסות שוב.', 'error');
+    }
 }
 
 // ============================================
@@ -2045,20 +2061,25 @@ function initRatingModule() {
         
         const comment = commentEl && commentEl.value ? commentEl.value.trim() : '(ללא הערה)';
         
-        const payload = new FormData();
-        payload.append('_subject', `דירוג חדש לאתר - ${rating}/10`);
-        payload.append('rating', String(rating));
-        payload.append('comment', comment);
-        payload.append('userType', userState.userType || 'unknown');
-        payload.append('healthFund', userState.healthFund || '(לא צוין)');
-        payload.append('city', userState.userLocation || '(לא צוין)');
-        payload.append('_template', 'box');
-        payload.append('_captcha', 'false');
+        const formSubmitUrl = `https://formsubmit.co/ajax/${encodeURIComponent(CONTACT_EMAIL)}`;
+        const payload = {
+            _subject: `דירוג חדש לאתר - ${rating}/10`,
+            rating: String(rating),
+            comment: comment,
+            userType: userState.userType || 'unknown',
+            healthFund: userState.healthFund || '(לא צוין)',
+            city: userState.userLocation || '(לא צוין)',
+            _template: 'box',
+            _captcha: 'false'
+        };
         
-        fetch(`https://formsubmit.co/ajax/${CONTACT_EMAIL}`, {
+        fetch(formSubmitUrl, {
             method: 'POST',
-            body: payload,
-            headers: { 'Accept': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
         })
             .then(response => response.json())
             .then(data => {
@@ -2109,9 +2130,9 @@ function validateForm(data) {
         isValid = false;
     }
     
-    // טלפון
-    const phoneRegex = /^[0-9]{9,10}$/;
-    if (!data.phone || !phoneRegex.test(data.phone.replace(/-/g, ''))) {
+    // טלפון (רק ספרות, 9–10)
+    const phoneDigits = (data.phone || '').replace(/\D/g, '');
+    if (phoneDigits.length < 9 || phoneDigits.length > 10) {
         showFieldError('phone', 'נא להזין מספר טלפון תקין (9-10 ספרות)');
         isValid = false;
     }
@@ -2144,13 +2165,14 @@ function validateField(fieldId) {
                 return false;
             }
             break;
-        case 'phone':
-            const phoneRegex = /^[0-9]{9,10}$/;
-            if (!value || !phoneRegex.test(value.replace(/-/g, ''))) {
-                showFieldError(fieldId, 'נא להזין מספר טלפון תקין');
+        case 'phone': {
+            const digits = (value || '').replace(/\D/g, '');
+            if (digits.length < 9 || digits.length > 10) {
+                showFieldError(fieldId, 'נא להזין מספר טלפון תקין (9-10 ספרות)');
                 return false;
             }
             break;
+        }
         case 'email':
             if (value && value.trim() !== '') {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
