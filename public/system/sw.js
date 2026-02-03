@@ -1,5 +1,8 @@
+// ============================================
 // Service Worker for PWA - Global Friendly Medicine Association
+// מפתח האתר: Michael Papaismedov
 // Version 1.0.1
+// ============================================
 
 const CACHE_NAME = 'gfma-v1.0.1';
 const OFFLINE_URL = 'public/system/offline.html';
@@ -116,3 +119,8 @@ self.addEventListener('message', (event) => {
     }
 });
 
+// ============================================
+// הצהרת בעלות / זכויות יוצרים
+// הקוד פותח על-ידי: Michael Papaismedov.
+// אין לעשות שימוש, העתקה או הפצה של הקוד ללא אישור.
+// ============================================

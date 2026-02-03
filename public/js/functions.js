@@ -3,10 +3,9 @@
  * Global Friendly Medicine Association
  * Main JavaScript Functions with Console Documentation
  * ============================================
- * 
+ * מפתח האתר: Michael Papaismedov
  * @fileoverview Main JavaScript file for GFMA website
  * @version 1.0.0
- * @author Global Friendly Medicine Association
  * @description Professional medical platform connecting patients with certified doctors worldwide
  */
 
@@ -2473,3 +2472,9 @@ window.autoDetectHealthFund = autoDetectHealthFund;
 console.log('✅ GFMA JavaScript loaded successfully');
 console.log('📊 System ready');
 console.log('🌐 All functions exposed to global scope');
+
+/**
+ * הצהרת בעלות / זכויות יוצרים
+ * הקוד פותח על-ידי: Michael Papaismedov.
+ * אין לעשות שימוש, העתקה או הפצה של הקוד ללא אישור.
+ */

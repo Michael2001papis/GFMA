@@ -1,5 +1,6 @@
 /**
  * Build script for GFMA - Vercel deployment
+ * מפתח האתר: Michael Papaismedov
  * Copies all necessary files to dist/ directory
  */
 
@@ -69,3 +70,9 @@ try {
   console.error('❌ Build failed:', error.message);
   process.exit(1);
 }
+
+/**
+ * הצהרת בעלות / זכויות יוצרים
+ * הקוד פותח על-ידי: Michael Papaismedov.
+ * אין לעשות שימוש, העתקה או הפצה של הקוד ללא אישור.
+ */
