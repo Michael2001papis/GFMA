@@ -26,11 +26,22 @@ const SPECIALTIES = [
     { specialty: "פסיכיאטר", description: "מומחה בבריאות הנפש וייעוץ פסיכיאטרי.", tags: ["נפש", "ערב"] }
 ];
 
-const DOCTOR_FIRST_NAMES = ["יעל", "דוד", "שרה", "מיכל", "אורית", "אמנון", "רננה", "רון", "נועם", "ליאור", "דני", "רונית", "עמית", "טל", "ניר", "דנה", "יוסי", "מירי", "גיל", "עינת"];
-const DOCTOR_LAST_NAMES = ["כהן", "לוי", "רוזן", "ישראלי", "בן דוד", "דוד", "שמיר", "גולן", "אברהם", "לוי", "מזרחי", "ברק", "פלד", "דהן", "קדוש", "עזרא", "חדד", "סלע", "בכר", "מנדל"];
+const DOCTOR_FIRST_NAMES = [
+    "יעל", "דוד", "שרה", "מיכל", "אורית", "אמנון", "רננה", "רון", "נועם", "ליאור",
+    "דני", "רונית", "עמית", "טל", "ניר", "דנה", "יוסי", "מירי", "גיל", "עינת",
+    "אלון", "לירון", "אביב", "שחר", "סהר", "מעין", "עמרי", "תמר", "אלכס", "אורי",
+    "שירי", "גלעד", "נועם ל.", "מירב", "ענת", "יואב", "שירה", "אליאב", "נוי", "בר"
+];
+
+const DOCTOR_LAST_NAMES = [
+    "כהן", "לוי", "רוזן", "ישראלי", "בן דוד", "דוד", "שמיר", "גולן", "אברהם", "מזרחי",
+    "ברק", "פלד", "דהן", "קדוש", "עזרא", "חדד", "סלע", "בכר", "מנדל", "אביטל",
+    "בנימיני", "צור", "רמקוביץ", "שמואלי", "גולדברג", "רייכמן", "שטרן", "אלבז", "חסון", "מלכה",
+    "פינקלשטיין", "פרידמן", "טוביה", "אוחנה", "שחר", "אלון", "ברוש", "זמיר", "הרצוג", "ברנד"
+];
 
 // כמה רופאים ליצור לכל עיר × התמחות (משפיע על כמות הרופאים בכל אזור)
-const DOCTORS_PER_SPECIALTY_PER_CITY = 3;
+const DOCTORS_PER_SPECIALTY_PER_CITY = 5;
 
 // רשימת ערים בישראל — למודאל פתיחה ולבניית רופאים (לכל עיר × כל התמחות)
 const ISRAEL_CITIES = [
@@ -74,10 +85,15 @@ function buildDoctorsData() {
 
             // יוצרים כמה רופאים לכל התמחות בעיר כדי להבטיח כמות מספקת לכל אזור
             for (let n = 0; n < DOCTORS_PER_SPECIALTY_PER_CITY; n++) {
-                const first = DOCTOR_FIRST_NAMES[(id - 1) % DOCTOR_FIRST_NAMES.length];
-                const last = DOCTOR_LAST_NAMES[(id - 1) % DOCTOR_LAST_NAMES.length];
+                // חישוב אינדקסים שונים לשם פרטי ושם משפחה כדי לקבל יותר קומבינציות ייחודיות
+                const baseIndex = c * SPECIALTIES.length * DOCTORS_PER_SPECIALTY_PER_CITY + s * DOCTORS_PER_SPECIALTY_PER_CITY + n;
+                const firstIndex = baseIndex % DOCTOR_FIRST_NAMES.length;
+                const lastIndex = (baseIndex * 7) % DOCTOR_LAST_NAMES.length;
+
+                const first = DOCTOR_FIRST_NAMES[firstIndex];
+                const last = DOCTOR_LAST_NAMES[lastIndex];
                 const years = 6 + (id % 20);
-                const healthFund = HEALTH_FUNDS[(id - 1) % HEALTH_FUNDS.length];
+                const healthFund = HEALTH_FUNDS[(baseIndex + c) % HEALTH_FUNDS.length];
                 data.push({
                     id,
                     name: `ד\"ר ${first} ${last}`,
