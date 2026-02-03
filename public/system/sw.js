@@ -1,7 +1,7 @@
 // Service Worker for PWA - Global Friendly Medicine Association
-// Version 1.0.0
+// Version 1.0.1
 
-const CACHE_NAME = 'gfma-v1.0.0';
+const CACHE_NAME = 'gfma-v1.0.1';
 const OFFLINE_URL = 'public/system/offline.html';
 
 // Assets to cache on install
@@ -9,11 +9,11 @@ const STATIC_ASSETS = [
     './',
     'index.html',
     'public/css/style.css',
-    'public/js/functions.js',
+    'public/js/app.js',
     'public/meta/manifest.json',
+    'public/meta/icon.svg',
     'public/system/offline.html',
     'public/system/404.html',
-    'favicon.ico',
     // Icons (optional - will fail silently if not present)
     // 'public/assets/icons/icon-192x192.png',
     // 'public/assets/icons/icon-512x512.png'

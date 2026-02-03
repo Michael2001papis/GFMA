@@ -1,7 +1,7 @@
 {
-  "name": "Global Friendly Medicine Association",
-  "short_name": "GFMA",
-  "description": "Professional medical platform connecting patients with certified doctors worldwide",
+  "name": "רפואה ידידותית",
+  "short_name": "רפואה",
+  "description": "פלטפורמה ידידותית לחיפוש רופאים",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -10,15 +10,9 @@
   "scope": "./",
   "icons": [
     {
-      "src": "/public/assets/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/public/assets/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/public/meta/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],

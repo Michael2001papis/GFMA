@@ -389,6 +389,25 @@ function updateUpdateUserButtonVisibility() {
 }
 
 // ============================================
+// PWA: Service Worker Registration
+// ============================================
+function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    
+    // רישום על window load כדי לא לעכב רינדור ראשוני
+    window.addEventListener('load', () => {
+        navigator.serviceWorker
+            .register('public/system/sw.js', { scope: '/' })
+            .then((registration) => {
+                console.log('✅ Service Worker registered:', registration.scope);
+            })
+            .catch((error) => {
+                console.warn('⚠️ Service Worker registration failed:', error);
+            });
+    });
+}
+
+// ============================================
 // ניהול מצב משתמש
 // ============================================
 
@@ -2793,6 +2812,7 @@ function executeActions(actions) {
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
+    registerServiceWorker();
 });
 
 console.log('✅ קובץ app.js נטען');
