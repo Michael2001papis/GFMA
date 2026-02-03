@@ -297,11 +297,12 @@ a:hover {
     display: block;
     color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
     transition: var(--transition-smooth);
     font-size: 0.95rem;
     position: relative;
     border-radius: var(--radius-sm);
+    text-align: center;
 }
 
 .nav-link::before {
@@ -2409,10 +2410,11 @@ html[data-theme="dark"] .doctor-specialty-badge {
     
     .nav-link {
         width: 100%;
-        text-align: right;
-        padding: 1.25rem 2rem;
+        text-align: center;
+        padding: 1rem 1.25rem;
         display: flex;
         align-items: center;
+        justify-content: center;
         color: rgba(255, 255, 255, 0.9);
         font-weight: 500;
         font-size: 1rem;
@@ -2421,7 +2423,7 @@ html[data-theme="dark"] .doctor-specialty-badge {
         line-height: 1.5;
         word-wrap: break-word;
         white-space: normal;
-        min-height: 56px;
+        min-height: 52px;
         position: relative;
     }
     

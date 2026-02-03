@@ -169,6 +169,15 @@ const THEME_STORAGE_KEY = 'userTheme';
 let currentTheme = null;
 
 // ============================================
+// מחירון — עריכה קלה (מי עושה מה וכמה זה עולה)
+// ============================================
+const PRICING_ITEMS = [
+    { title: 'מי יכול לפענח בדיקות?', price: '250–500 ₪' },
+    { title: 'מי יכול להסביר תוצאות?', price: 'כ-100 ₪ להסבר קצר וממוקד' },
+    { title: 'מי יכול לענות על שאלה רפואית כללית?', price: 'סביב 100 ₪ לשאלה קצרה' }
+];
+
+// ============================================
 // ניהול Theme (Dark Mode)
 // ============================================
 
@@ -291,6 +300,7 @@ function initApp() {
     initNavigation();
     initWelcomeModal(); // מודאל פתיחה
     initDoctorsModule();
+    initPricingModule(); // מחירון — נבנה מ-PRICING_ITEMS
     initContactForm();
     initChatBot(); // צ'אט-בוט עוזר רפואי
     
@@ -1723,6 +1733,22 @@ function createDoctorCard(doctor) {
 }
 
 // ============================================
+// מחירון (מי עושה מה — וכמה זה עולה)
+// ============================================
+
+function initPricingModule() {
+    const container = document.getElementById('pricing-list');
+    if (!container) return;
+    
+    container.innerHTML = PRICING_ITEMS.map(item => `
+        <div class="pricing-item">
+            <h3>${escapeHtml(item.title)}</h3>
+            <p>${escapeHtml(item.price)}</p>
+        </div>
+    `).join('');
+}
+
+// ============================================
 // טופס יצירת קשר
 // ============================================
 
@@ -1750,12 +1776,15 @@ function initContactForm() {
     console.log('✅ טופס מוכן');
 }
 
+// כתובת אימייל לקבלת פניות מטופס יצירת קשר
+const CONTACT_EMAIL = 'likapap18@gmail.com';
+
 function handleFormSubmit(e) {
     e.preventDefault();
     console.log('📝 שליחת טופס...');
     
     // איסוף נתונים
-    const formData = {
+    const formDataObj = {
         fullName: getFieldValue('full-name'),
         phone: getFieldValue('phone'),
         email: getFieldValue('email'),
@@ -1764,18 +1793,66 @@ function handleFormSubmit(e) {
     };
     
     // ולידציה
-    if (!validateForm(formData)) {
+    if (!validateForm(formDataObj)) {
         console.log('❌ ולידציה נכשלה');
         return;
     }
     
-    // הצגת הודעת הצלחה
-    showSuccessMessage();
+    const submitBtn = document.querySelector('#contact-form button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.textContent : '';
     
-    // ניקוי הטופס
-    clearForm();
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'שולח...';
+    }
     
-    console.log('✅ טופס נשלח בהצלחה');
+    // הכנת נתונים לשליחה (FormSubmit.co)
+    const formData = new FormData();
+    formData.append('_subject', `פנייה חדשה מרפואה ידידותית - ${getSubjectLabel(formDataObj.subject)}`);
+    formData.append('שם מלא', formDataObj.fullName);
+    formData.append('טלפון', formDataObj.phone);
+    formData.append('דוא"ל', formDataObj.email || '(לא צוין)');
+    formData.append('נושא', getSubjectLabel(formDataObj.subject));
+    formData.append('הודעה', formDataObj.message || '(לא צוין)');
+    formData.append('_template', 'box');
+    formData.append('_captcha', 'false');
+    
+    fetch(`https://formsubmit.co/ajax/${CONTACT_EMAIL}`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success === 'true') {
+                showSuccessMessage();
+                clearForm();
+                console.log('✅ טופס נשלח בהצלחה');
+            } else {
+                throw new Error(data.message || 'שגיאה בשליחה');
+            }
+        })
+        .catch(err => {
+            console.error('❌ שגיאה בשליחת טופס:', err);
+            showToast('שגיאה בשליחת ההודעה. נא לנסות שוב או ליצור קשר ישירות במייל.', 'error');
+        })
+        .finally(() => {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        });
+}
+
+function getSubjectLabel(value) {
+    const labels = {
+        'new-appointment': 'תור חדש',
+        'medical-question': 'שאלה רפואית כללית',
+        'second-opinion': 'חוות דעת נוספת',
+        'home-visit': 'ביקור בית',
+        'other': 'אחר'
+    };
+    return labels[value] || value || 'ללא נושא';
 }
 
 function validateForm(data) {
