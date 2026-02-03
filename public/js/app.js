@@ -40,8 +40,9 @@ const DOCTOR_LAST_NAMES = [
     "פינקלשטיין", "פרידמן", "טוביה", "אוחנה", "שחר", "אלון", "ברוש", "זמיר", "הרצוג", "ברנד"
 ];
 
-// כמה רופאים ליצור לכל עיר × התמחות (משפיע על כמות הרופאים בכל אזור)
-const DOCTORS_PER_SPECIALTY_PER_CITY = 5;
+// כמה רופאים ליצור לכל עיר × התמחות (כמות בסיסית בלבד)
+// הערה: כבר לא יוצרים אלפי רופאים מראש — רק רופא אחד לכל התמחות בכל עיר.
+const DOCTORS_PER_SPECIALTY_PER_CITY = 1;
 
 // רשימת ערים בישראל — למודאל פתיחה ולבניית רופאים (לכל עיר × כל התמחות)
 const ISRAEL_CITIES = [
@@ -125,7 +126,11 @@ const doctorsData = buildDoctorsData();
 // משתנים גלובליים
 // ============================================
 
-let currentDoctorsList = [...doctorsData]; // עותק של הרשימה המלאה
+let currentDoctorsList = [...doctorsData]; // עותק של הרשימה המלאה/המסוננת לתצוגה
+let currentDoctorsRenderedCount = 0;
+
+const MAX_DOCTORS_INITIAL = 20;
+const MAX_DOCTORS_INCREMENT = 20;
 
 // מצב משתמש
 let userState = {
@@ -271,6 +276,7 @@ function initApp() {
     initNavigation();
     initWelcomeModal(); // מודאל פתיחה
     initDoctorsModule();
+    initDoctorActionModal();
     initPricingModule(); // מחירון — נבנה מ-PRICING_ITEMS
     initRatingModule(); // דירוג האתר (1–10)
     initContactForm();
@@ -1324,6 +1330,24 @@ function initDoctorsModule() {
         });
     }
     
+    // כפתור "טען עוד"
+    const loadMoreBtn = document.getElementById('doctors-load-more');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            const list = currentDoctorsList || [];
+            if (currentDoctorsRenderedCount < list.length) {
+                const nextCount = Math.min(currentDoctorsRenderedCount + MAX_DOCTORS_INCREMENT, list.length);
+                appendDoctors(list.slice(currentDoctorsRenderedCount, nextCount), currentDoctorsRenderedCount);
+                currentDoctorsRenderedCount = nextCount;
+                if (nextCount >= list.length) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            } else {
+            loadMoreBtn.style.display = 'none';
+            }
+        });
+    }
+    
     // עדכון תצוגת המתג
     updateLocationFilterToggle();
     
@@ -1358,36 +1382,55 @@ function handleDoctorsSearch() {
 }
 
 function filterDoctors(searchTerm) {
-    let doctors = [...doctorsData];
+    const baseDoctors = [...doctorsData];
+    const hasSearch = !!(searchTerm && searchTerm.trim() !== '');
+    const MIN_PER_AREA = 5;
+    
+    let doctorsByLocation = baseDoctors;
     
     // סינון לפי מיקום (אם משתמש רשום ומסנן לפי מיקום)
     if (userState.userType === 'registered' && 
         userState.userLocation && 
         userState.filterByLocation) {
         const locationLower = userState.userLocation.toLowerCase().trim();
-        doctors = doctors.filter(doctor => {
+        doctorsByLocation = baseDoctors.filter(doctor => {
             if (!doctor.city) return false;
             return doctor.city.toLowerCase().includes(locationLower) || 
                    locationLower.includes(doctor.city.toLowerCase());
         });
-        console.log(`📍 סונן לפי מיקום "${userState.userLocation}": ${doctors.length} רופאים`);
+        console.log(`📍 סונן לפי מיקום "${userState.userLocation}": ${doctorsByLocation.length} רופאים`);
     }
     
     // סינון לפי קופת חולים (אם משתמש רשום ובחר קופה)
+    let doctorsByLocationAndFund = doctorsByLocation;
     if (userState.userType === 'registered' && userState.healthFund) {
-        const before = doctors.length;
-        doctors = doctors.filter(doctor => doctor.healthFund === userState.healthFund);
-        console.log(`🏥 סונן לפי קופת חולים "${userState.healthFund}": ${doctors.length} רופאים`);
+        doctorsByLocationAndFund = doctorsByLocation.filter(doctor => doctor.healthFund === userState.healthFund);
+        console.log(`🏥 סונן לפי קופת חולים "${userState.healthFund}": ${doctorsByLocationAndFund.length} רופאים`);
     }
     
-    // אם החיפוש ריק - החזרת הרופאים המסוננים (עם או בלי מיקום)
-    if (!searchTerm || searchTerm.trim() === '') {
+    let doctors = doctorsByLocationAndFund;
+    
+    // הבטחה למינימום רופאים באזור: אם אין מספיק, מרחיבים בהדרגה את החיפוש (רק כשאין חיפוש טקסט חופשי)
+    if (!hasSearch && doctors.length < MIN_PER_AREA) {
+        // קודם כל, נסיר את סינון קופת החולים אבל נשמור על המיקום
+        if (doctorsByLocation.length >= MIN_PER_AREA) {
+            console.log(`🔄 פחות מ-${MIN_PER_AREA} רופאים לעיר+קופה — מציג את כל הרופאים בעיר ללא סינון קופה`);
+            doctors = doctorsByLocation;
+        } else if (baseDoctors.length >= MIN_PER_AREA) {
+            // אם גם בעיר אין מספיק, נרחיב לכל הארץ
+            console.log(`🌍 פחות מ-${MIN_PER_AREA} רופאים בעיר — מרחיבים חיפוש לכל הארץ`);
+            doctors = baseDoctors;
+        }
+    }
+    
+    // אם החיפוש ריק - החזרת הרופאים המסוננים (אחרי הרחבות במידת הצורך)
+    if (!hasSearch) {
         return doctors;
     }
     
     const term = searchTerm.toLowerCase().trim();
     
-    // סינון לפי: שם, התמחות, עיר, תגיות (על הרופאים שכבר מסוננים לפי מיקום)
+    // סינון לפי: שם, התמחות, עיר, תגיות (על הרופאים שכבר מסוננים לפי מיקום/קופה/הרחבה)
     return doctors.filter(doctor => {
         // חיפוש בשם
         if (doctor.name && doctor.name.toLowerCase().includes(term)) {
@@ -1424,6 +1467,7 @@ function renderDoctors(doctors, searchTerm = '') {
     const expandMessage = document.getElementById('expand-search-message');
     const noResultsMessage = document.getElementById('no-results-message');
     const searchInput = document.getElementById('doctor-search-input');
+    const loadMoreBtn = document.getElementById('doctors-load-more');
     const currentSearchTerm = searchTerm || (searchInput ? searchInput.value.trim() : '');
     
     if (!doctorsList) {
@@ -1478,6 +1522,10 @@ function renderDoctors(doctors, searchTerm = '') {
             expandMessage.style.display = 'none';
         }
         
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = 'none';
+        }
+        
         return;
     }
     
@@ -1495,15 +1543,33 @@ function renderDoctors(doctors, searchTerm = '') {
     // ניקוי הרשימה
     doctorsList.innerHTML = '';
     
-    // יצירת כרטיסי רופאים עם אנימציה
-    doctors.forEach((doctor, index) => {
-        const card = createDoctorCard(doctor);
-        // הוספת השהיה קלה לכל כרטיס לאנימציה מדורגת
-        card.style.animationDelay = `${index * 0.05}s`;
-        doctorsList.appendChild(card);
-    });
+    // שמירת רשימת הרופאים המסוננים והצגה מדורגת עם "טען עוד"
+    currentDoctorsList = doctors;
+    const total = doctors.length;
+    currentDoctorsRenderedCount = Math.min(MAX_DOCTORS_INITIAL, total);
+    
+    appendDoctors(currentDoctorsList.slice(0, currentDoctorsRenderedCount), 0);
+    
+    if (loadMoreBtn) {
+        if (currentDoctorsRenderedCount < total) {
+            loadMoreBtn.style.display = 'inline-flex';
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
+    }
     
     console.log('✅ רופאים מוצגים');
+}
+
+function appendDoctors(doctorsSlice, startIndex) {
+    const doctorsList = document.getElementById('doctors-list');
+    if (!doctorsList || !doctorsSlice || doctorsSlice.length === 0) return;
+    
+    doctorsSlice.forEach((doctor, idx) => {
+        const card = createDoctorCard(doctor);
+        card.style.animationDelay = `${(startIndex + idx) * 0.05}s`;
+        doctorsList.appendChild(card);
+    });
 }
 
 function updateLocationFilterToggle() {
@@ -1750,23 +1816,21 @@ function createDoctorCard(doctor) {
         </div>
     `;
     
-    // הוספת event listeners לכפתורים (placeholder - לא עושים כלום כרגע)
+    // הוספת event listeners לכפתורים
     const bookBtn = card.querySelector('.btn-book-appointment');
     const messageBtn = card.querySelector('.btn-send-message');
     
     if (bookBtn) {
         bookBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('📅 קבע תור לרופא:', doctor.name);
-            // TODO: פתיחת מודאל/פעולה בעתיד
+            openDoctorActionModal(doctor, 'appointment');
         });
     }
     
     if (messageBtn) {
         messageBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('💬 שלח הודעה לרופא:', doctor.name);
-            // TODO: פתיחת מודאל/פעולה בעתיד
+            openDoctorActionModal(doctor, 'message');
         });
     }
     
@@ -1898,6 +1962,189 @@ function handleFormSubmit(e) {
     } catch (err) {
         console.error('❌ שגיאה בטופס יצירת קשר:', err);
         showToast('אירעה שגיאה. נא לבדוק את השדות ולנסות שוב.', 'error');
+    }
+}
+
+// ============================================
+// מודאל פעולות רופא (קבע תור / שלח הודעה)
+// ============================================
+
+const DOCTOR_ACTIONS_STORAGE_KEY = 'doctorActions';
+let currentDoctorAction = null; // { type: 'appointment' | 'message', doctor }
+
+function initDoctorActionModal() {
+    const modal = document.getElementById('doctor-action-modal');
+    if (!modal) return;
+    
+    const overlay = modal.querySelector('.modal-overlay');
+    const form = document.getElementById('doctor-action-form');
+    const cancelBtn = document.getElementById('doctor-action-cancel-btn');
+    
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeDoctorActionModal();
+        });
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            closeDoctorActionModal();
+        });
+    }
+    
+    if (form) {
+        form.addEventListener('submit', handleDoctorActionSubmit);
+    }
+    
+    console.log('✅ מודאל פעולות רופא מוכן');
+}
+
+function openDoctorActionModal(doctor, actionType) {
+    const modal = document.getElementById('doctor-action-modal');
+    if (!modal || !doctor) return;
+    
+    currentDoctorAction = { type: actionType, doctor };
+    
+    const titleEl = document.getElementById('doctor-action-title');
+    const subtitleEl = document.getElementById('doctor-action-subtitle');
+    const summaryEl = document.getElementById('doctor-action-summary');
+    const notesLabel = document.getElementById('doctor-action-notes-label');
+    const submitBtn = document.getElementById('doctor-action-submit-btn');
+    const successEl = document.getElementById('doctor-action-success');
+    
+    const patientNameInput = document.getElementById('doctor-action-patient-name');
+    const patientPhoneInput = document.getElementById('doctor-action-patient-phone');
+    const notesInput = document.getElementById('doctor-action-notes');
+    
+    if (successEl) {
+        successEl.style.display = 'none';
+    }
+    
+    // התאמת טקסטים לפי סוג הפעולה
+    if (actionType === 'appointment') {
+        if (titleEl) titleEl.textContent = 'קבע תור לרופא';
+        if (subtitleEl) subtitleEl.textContent = 'מלא את הפרטים כדי לשמור בקשת תור לרופא הנבחר (לצורכי הדגמה בלבד).';
+        if (notesLabel) notesLabel.textContent = 'העדפת זמן לתור / סיבה לפנייה';
+        if (submitBtn) submitBtn.textContent = 'שמור בקשת תור';
+    } else {
+        if (titleEl) titleEl.textContent = 'שלח הודעה לרופא';
+        if (subtitleEl) subtitleEl.textContent = 'מלא את הפרטים כדי לשמור הודעה לרופא הנבחר (לצורכי הדגמה בלבד).';
+        if (notesLabel) notesLabel.textContent = 'תוכן ההודעה / פרטים נוספים';
+        if (submitBtn) submitBtn.textContent = 'שמור הודעה';
+    }
+    
+    // מילוי סיכום הרופא
+    if (summaryEl) {
+        const parts = [];
+        if (doctor.name) parts.push(`<strong>${escapeHtml(doctor.name)}</strong>`);
+        if (doctor.specialty) parts.push(escapeHtml(doctor.specialty));
+        if (doctor.city) parts.push(`עיר: ${escapeHtml(doctor.city)}`);
+        if (doctor.healthFund) parts.push(`קופת חולים: ${escapeHtml(doctor.healthFund)}`);
+        
+        summaryEl.innerHTML = `
+            <div class="doctor-action-summary-inner">
+                <p>${parts.join(' | ')}</p>
+            </div>
+        `;
+    }
+    
+    // איפוס שדות טופס
+    if (patientNameInput) {
+        patientNameInput.value = '';
+    }
+    if (patientPhoneInput) {
+        patientPhoneInput.value = '';
+    }
+    if (notesInput) {
+        notesInput.value = '';
+    }
+    
+    modal.style.display = 'block';
+    modal.classList.add('active');
+}
+
+function closeDoctorActionModal() {
+    const modal = document.getElementById('doctor-action-modal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+    currentDoctorAction = null;
+}
+
+function handleDoctorActionSubmit(e) {
+    e.preventDefault();
+    
+    if (!currentDoctorAction) {
+        closeDoctorActionModal();
+        return;
+    }
+    
+    const patientNameInput = document.getElementById('doctor-action-patient-name');
+    const patientPhoneInput = document.getElementById('doctor-action-patient-phone');
+    const notesInput = document.getElementById('doctor-action-notes');
+    const successEl = document.getElementById('doctor-action-success');
+    
+    const name = patientNameInput ? patientNameInput.value.trim() : '';
+    const phone = patientPhoneInput ? patientPhoneInput.value.trim() : '';
+    const notes = notesInput ? notesInput.value.trim() : '';
+    
+    let hasError = false;
+    
+    const nameError = document.getElementById('error-doctor-action-patient-name');
+    const phoneError = document.getElementById('error-doctor-action-patient-phone');
+    
+    if (!name) {
+        hasError = true;
+        if (nameError) nameError.textContent = 'נא להזין שם מלא';
+    } else if (nameError) {
+        nameError.textContent = '';
+    }
+    
+    if (!phone) {
+        hasError = true;
+        if (phoneError) phoneError.textContent = 'נא להזין מספר טלפון';
+    } else if (phoneError) {
+        phoneError.textContent = '';
+    }
+    
+    if (hasError) {
+        return;
+    }
+    
+    const actionRecord = {
+        id: Date.now(),
+        type: currentDoctorAction.type,
+        doctorId: currentDoctorAction.doctor.id,
+        doctorName: currentDoctorAction.doctor.name,
+        doctorCity: currentDoctorAction.doctor.city,
+        doctorHealthFund: currentDoctorAction.doctor.healthFund || null,
+        createdAt: new Date().toISOString(),
+        patientName: name,
+        patientPhone: phone,
+        notes: notes
+    };
+    
+    saveDoctorActionToLocalStorage(actionRecord);
+    
+    if (successEl) {
+        successEl.style.display = 'block';
+    }
+    
+    showToast('✅ הבקשה נשמרה במכשיר (דמו בלבד).', 'success');
+    
+    // השארת המודאל פתוח כדי שהמשתמש יראה את ההודעה; אפשר לסגור ידנית
+}
+
+function saveDoctorActionToLocalStorage(actionRecord) {
+    try {
+        const raw = localStorage.getItem(DOCTOR_ACTIONS_STORAGE_KEY);
+        const existing = raw ? JSON.parse(raw) : [];
+        existing.push(actionRecord);
+        localStorage.setItem(DOCTOR_ACTIONS_STORAGE_KEY, JSON.stringify(existing));
+        console.log('💾 Doctor action saved:', actionRecord);
+    } catch (error) {
+        console.error('❌ שגיאה בשמירת פעולת רופא ב-localStorage:', error);
     }
 }
 

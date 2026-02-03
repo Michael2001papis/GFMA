@@ -3,5 +3,6 @@ Allow: /
 Disallow: /js/
 Disallow: /css/
 
+# זכויות יוצרים: הקוד והתוכן באתר פותחו על-ידי Michael Papaismedov.
+# אין לעשות שימוש, העתקה או הפצה ללא אישור מפורש.
 Sitemap: https://gfma.org/sitemap.xml
-

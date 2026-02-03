@@ -208,6 +208,11 @@
                 <div id="doctors-list" class="doctors-list">
                     <!-- Doctors cards will be rendered here by JavaScript -->
                 </div>
+                <div class="doctors-load-more-wrapper">
+                    <button id="doctors-load-more" class="btn btn-outline btn-small" style="display: none;">
+                        טען עוד רופאים
+                    </button>
+                </div>
 
                 <!-- Empty State -->
                 <div id="doctors-empty" class="empty-state" style="display: none;">
@@ -448,6 +453,68 @@
             </div>
         </section>
     </main>
+
+    <!-- Doctor Action Modal (קביעת תור / שליחת הודעה לרופא) -->
+    <div id="doctor-action-modal" class="welcome-modal doctor-action-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="doctor-action-title">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="doctor-action-title">קבע תור</h2>
+                <p class="modal-subtitle" id="doctor-action-subtitle">מילוי פרטים לשליחת בקשה לרופא הנבחר.</p>
+            </div>
+            <div class="modal-body">
+                <div class="doctor-action-summary" id="doctor-action-summary">
+                    <!-- פרטי הרופא יוזרקו כאן מ-JS -->
+                </div>
+                <form id="doctor-action-form" class="modal-form">
+                    <div class="form-group">
+                        <label for="doctor-action-patient-name">שם מלא *</label>
+                        <input 
+                            type="text" 
+                            id="doctor-action-patient-name" 
+                            name="patientName" 
+                            required 
+                            aria-required="true"
+                            autocomplete="name"
+                        >
+                        <span class="error-message" id="error-doctor-action-patient-name"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctor-action-patient-phone">טלפון *</label>
+                        <input 
+                            type="tel" 
+                            id="doctor-action-patient-phone" 
+                            name="patientPhone" 
+                            required
+                            aria-required="true"
+                            autocomplete="tel"
+                        >
+                        <span class="error-message" id="error-doctor-action-patient-phone"></span>
+                    </div>
+
+                    <div class="form-group" id="doctor-action-extra-group">
+                        <label for="doctor-action-notes" id="doctor-action-notes-label">העדפת זמן לתור / פרטים נוספים</label>
+                        <textarea 
+                            id="doctor-action-notes" 
+                            name="notes" 
+                            rows="4"
+                            aria-label="פרטים נוספים לבקשה"
+                        ></textarea>
+                    </div>
+
+                    <div id="doctor-action-success" class="success-message" style="display: none;">
+                        ✅ הבקשה נשמרה בהצלחה במכשיר שלך (לצורכי הדגמה בלבד).
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary btn-large" id="doctor-action-submit-btn">שמור בקשה</button>
+                        <button type="button" class="btn btn-secondary" id="doctor-action-cancel-btn">ביטול</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="main-footer">
