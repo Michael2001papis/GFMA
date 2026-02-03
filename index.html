@@ -387,6 +387,62 @@
                 </div>
             </div>
         </section>
+
+        <!-- Site Rating Section -->
+        <section id="site-rating" class="section">
+            <div class="container">
+                <h2 class="section-title">דרגו את חוויית השימוש באתר</h2>
+                <p class="section-intro" style="max-width: 800px; margin: 0 auto 2rem; text-align: center; line-height: 1.8; color: var(--text-light);">
+                    הדירוג שלכם (1–10) עוזר להבין עד כמה האתר ברור, מועיל ונוח לשימוש, ואיפה אפשר להשתפר.<br>
+                    נשמח אם תקדישו רגע קטן כדי לתת ציון ולשתף בתחושה הכללית שלכם.
+                </p>
+                
+                <form id="rating-form" class="rating-form">
+                    <div class="rating-slider-wrapper">
+                        <label for="rating-input" class="rating-label">
+                            הדירוג שלי:
+                            <span id="rating-value" class="rating-value">7</span>
+                            <span class="rating-scale">/ 10</span>
+                        </label>
+                        <input 
+                            type="range" 
+                            id="rating-input" 
+                            name="rating" 
+                            min="1" 
+                            max="10" 
+                            step="1" 
+                            value="7"
+                            aria-valuemin="1"
+                            aria-valuemax="10"
+                            aria-valuenow="7"
+                            aria-label="דירוג האתר בין 1 ל-10"
+                            class="rating-range"
+                        >
+                        <div class="rating-scale-labels">
+                            <span>1 - חוויה לא טובה</span>
+                            <span>10 - חוויה מצוינת</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rating-comment">רוצים גם להסביר במילים? (לא חובה)</label>
+                        <textarea 
+                            id="rating-comment" 
+                            name="rating-comment" 
+                            rows="4"
+                            class="rating-comment"
+                            aria-label="הסבר קצר על הדירוג (לא חובה)"
+                        ></textarea>
+                    </div>
+
+                    <div id="rating-success" class="rating-success" style="display: none;">
+                        תודה רבה על המשוב! הוא יעזור לשפר את חוויית השימוש באתר.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-large">שלח דירוג</button>
+                </form>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->

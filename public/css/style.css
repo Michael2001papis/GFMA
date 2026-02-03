@@ -2227,6 +2227,64 @@ html[data-theme="dark"] .doctor-specialty-badge {
     font-size: 0.9rem;
 }
 
+/* ============================================
+   Site Rating (1–10)
+   ============================================ */
+
+.rating-form {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.rating-slider-wrapper {
+    margin: 1.5rem 0 1.75rem;
+}
+
+.rating-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-deep-dark);
+    margin-bottom: 0.75rem;
+}
+
+.rating-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--miki-deep-blue);
+    margin: 0 0.25rem;
+}
+
+.rating-scale {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.rating-range {
+    width: 100%;
+    accent-color: var(--miki-turquoise);
+}
+
+.rating-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.rating-comment {
+    width: 100%;
+    resize: vertical;
+}
+
+.rating-success {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    color: var(--miki-turquoise);
+    font-weight: 600;
+}
+
 /* Welcome modal: קומפקטי במסכים קטנים — פחות גלילה */
 @media (max-height: 600px), (max-width: 480px) {
     .welcome-modal {

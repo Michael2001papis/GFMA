@@ -368,6 +368,7 @@ function initApp() {
     initWelcomeModal(); // מודאל פתיחה
     initDoctorsModule();
     initPricingModule(); // מחירון — נבנה מ-PRICING_ITEMS
+    initRatingModule(); // דירוג האתר (1–10)
     initContactForm();
     initChatBot(); // צ'אט-בוט עוזר רפואי
     
@@ -1921,8 +1922,8 @@ function initContactForm() {
     console.log('✅ טופס מוכן');
 }
 
-// כתובת אימייל לקבלת פניות מטופס יצירת קשר
-const CONTACT_EMAIL = 'likapap18@gmail.com';
+// כתובת אימייל לקבלת פניות מטופס יצירת קשר ודירוגי אתר
+const CONTACT_EMAIL = 'dvnka2@gmail.com';
 
 function handleFormSubmit(e) {
     e.preventDefault();
@@ -1987,6 +1988,105 @@ function handleFormSubmit(e) {
                 submitBtn.textContent = originalBtnText;
             }
         });
+}
+
+// ============================================
+// דירוג האתר (1–10)
+// ============================================
+
+const RATING_STORAGE_KEY = 'siteRatingSubmitted';
+
+function initRatingModule() {
+    const form = document.getElementById('rating-form');
+    const rangeInput = document.getElementById('rating-input');
+    const valueEl = document.getElementById('rating-value');
+    const commentEl = document.getElementById('rating-comment');
+    const successEl = document.getElementById('rating-success');
+    
+    if (!form || !rangeInput || !valueEl) {
+        return;
+    }
+    
+    // עדכון ערך התצוגה לפי ברירת מחדל
+    valueEl.textContent = rangeInput.value;
+    rangeInput.setAttribute('aria-valuenow', rangeInput.value);
+    
+    // אם המשתמש כבר שלח דירוג בעבר (במכשיר זה) – מציגים הודעת תודה
+    try {
+        const hasRated = localStorage.getItem(RATING_STORAGE_KEY);
+        if (hasRated === 'true' && successEl) {
+            successEl.style.display = 'block';
+        }
+    } catch (e) {
+        // אם localStorage לא זמין – מתעלמים בשקט
+    }
+    
+    rangeInput.addEventListener('input', () => {
+        valueEl.textContent = rangeInput.value;
+        rangeInput.setAttribute('aria-valuenow', rangeInput.value);
+    });
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const rating = parseInt(rangeInput.value, 10);
+        if (Number.isNaN(rating) || rating < 1 || rating > 10) {
+            showToast('נא לבחור דירוג בין 1 ל-10', 'error');
+            return;
+        }
+        
+        const submitBtn = form.querySelector('button[type=\"submit\"]');
+        const originalText = submitBtn ? submitBtn.textContent : '';
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שולח...';
+        }
+        
+        const comment = commentEl && commentEl.value ? commentEl.value.trim() : '(ללא הערה)';
+        
+        const payload = new FormData();
+        payload.append('_subject', `דירוג חדש לאתר - ${rating}/10`);
+        payload.append('rating', String(rating));
+        payload.append('comment', comment);
+        payload.append('userType', userState.userType || 'unknown');
+        payload.append('healthFund', userState.healthFund || '(לא צוין)');
+        payload.append('city', userState.userLocation || '(לא צוין)');
+        payload.append('_template', 'box');
+        payload.append('_captcha', 'false');
+        
+        fetch(`https://formsubmit.co/ajax/${CONTACT_EMAIL}`, {
+            method: 'POST',
+            body: payload,
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success === 'true') {
+                    try {
+                        localStorage.setItem(RATING_STORAGE_KEY, 'true');
+                    } catch (e) {
+                        // ignore
+                    }
+                    if (successEl) {
+                        successEl.style.display = 'block';
+                    }
+                    showToast('תודה על הדירוג! המשוב יעזור לשפר את חוויית השימוש באתר.', 'success');
+                } else {
+                    throw new Error(data.message || 'שגיאה בשליחת הדירוג');
+                }
+            })
+            .catch(err => {
+                console.error('❌ שגיאה בשליחת דירוג:', err);
+                showToast('שגיאה בשליחת הדירוג. נא לנסות שוב מאוחר יותר.', 'error');
+            })
+            .finally(() => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+    });
 }
 
 function getSubjectLabel(value) {
