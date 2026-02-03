@@ -1955,13 +1955,15 @@ html[data-theme="dark"] .doctor-specialty-badge {
 
 .modal-content {
     position: relative;
+    display: flex;
+    flex-direction: column;
     background: linear-gradient(135deg, var(--bg-pure-white) 0%, var(--bg-card-blush) 100%);
     border-radius: var(--radius-lg);
-    padding: 3rem;
-    max-width: 600px;
+    padding: 1.5rem 2rem 2rem;
+    max-width: 560px;
     width: 100%;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 59, 115, 0.3);
     border: 2px solid rgba(0, 214, 199, 0.3);
     z-index: 10000;
@@ -2020,25 +2022,31 @@ html[data-theme="dark"] .doctor-specialty-badge {
 }
 
 .modal-header {
+    flex-shrink: 0;
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
 }
 
 .modal-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--miki-deep-blue);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     font-weight: 800;
 }
 
 .modal-subtitle {
-    font-size: 1.125rem;
+    font-size: 1rem;
     color: var(--text-light-gray);
-    line-height: 1.7;
+    line-height: 1.5;
 }
 
 .modal-form {
-    margin-top: 2rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 0;
+    padding-top: 0.25rem;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Field Labels with Icons */
@@ -2139,7 +2147,7 @@ html[data-theme="dark"] .doctor-specialty-badge {
 
 /* Enhanced Form Group */
 .modal-form .form-group {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
     transition: var(--transition-smooth);
 }
 
@@ -2158,21 +2166,21 @@ html[data-theme="dark"] .doctor-specialty-badge {
 
 .modal-actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
     flex-wrap: wrap;
 }
 
 .modal-actions .btn {
     flex: 1;
-    min-width: 150px;
+    min-width: 140px;
 }
 
 .modal-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 2rem 0;
+    margin: 1.25rem 0;
     color: var(--text-muted);
 }
 
@@ -2187,6 +2195,47 @@ html[data-theme="dark"] .doctor-specialty-badge {
 .modal-divider span {
     padding: 0 1rem;
     font-size: 0.9rem;
+}
+
+/* Welcome modal: קומפקטי במסכים קטנים — פחות גלילה */
+@media (max-height: 600px), (max-width: 480px) {
+    .welcome-modal {
+        padding: 0.5rem;
+        align-items: flex-start;
+        justify-content: flex-start;
+        overflow-y: auto;
+    }
+    
+    .modal-content {
+        max-height: none;
+        margin: auto;
+        padding: 1rem 1.25rem 1.25rem;
+    }
+    
+    .modal-header {
+        margin-bottom: 0.75rem;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .modal-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .modal-form .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .modal-actions {
+        margin-top: 1rem;
+    }
+    
+    .modal-divider {
+        margin: 1rem 0;
+    }
 }
 
 /* Close Confirmation Modal */

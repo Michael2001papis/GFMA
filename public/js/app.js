@@ -178,6 +178,73 @@ const PRICING_ITEMS = [
 ];
 
 // ============================================
+// רשימת ערים בישראל (לשדה "עיר" במודאל פתיחה)
+// עריכה קלה: הוסיפו/הסירו ערים כאן
+// ============================================
+const ISRAEL_CITIES = [
+    'תל אביב',
+    'ירושלים',
+    'חיפה',
+    'באר שבע',
+    'ראשון לציון',
+    'פתח תקווה',
+    'נתניה',
+    'אשדוד',
+    'אשקלון',
+    'חולון',
+    'בת ים',
+    'רמת גן',
+    'גבעתיים',
+    'בני ברק',
+    'הרצליה',
+    'כפר סבא',
+    'רעננה',
+    'הוד השרון',
+    'רמת השרון',
+    'רחובות',
+    'נס ציונה',
+    'לוד',
+    'רמלה',
+    'מודיעין-מכבים-רעות',
+    'בית שמש',
+    'אילת',
+    'חדרה',
+    'עפולה',
+    'טבריה',
+    'נצרת',
+    'עכו',
+    'נהריה',
+    'קריית שמונה',
+    'כרמיאל',
+    'מעלות-תרשיחא',
+    'יקנעם עילית',
+    'זכרון יעקב',
+    'בנימינה-גבעת עדה',
+    'אור יהודה',
+    'יהוד-מונוסון',
+    'קריית אונו',
+    'גבעת שמואל',
+    'ראש העין',
+    'רמת בית שמש',
+    'יבנה',
+    'קריית גת',
+    'דימונה',
+    'ערד',
+    'נתיבות',
+    'שדרות',
+    'עומר',
+    'להבים',
+    'טירה',
+    'טייבה',
+    'אום אל-פחם',
+    'באקה אל-גרבייה',
+    'שפרעם',
+    'סכנין'
+];
+
+const ISRAEL_CITY_SET = new Set(ISRAEL_CITIES);
+
+// ============================================
 // ניהול Theme (Dark Mode)
 // ============================================
 
@@ -442,13 +509,24 @@ function validateHealthFund(value) {
 }
 
 // ולידציה בזמן אמת - מיקום
-function validateLocation(value) {
-    if (!value || value.trim() === '') {
-        return { isValid: false, message: 'נא להזין מיקום', status: 'warning' };
+function validateLocation(value, { strict = false } = {}) {
+    const city = (value || '').trim();
+    
+    if (!city) {
+        return { isValid: false, message: 'נא לבחור עיר', status: 'warning' };
     }
     
-    if (value.trim().length < 2) {
-        return { isValid: false, message: 'מיקום חייב להכיל לפחות 2 תווים', status: 'invalid' };
+    // מצב בזמן הקלדה: לא מציגים "שגיאה אדומה" לפני שהמשתמש סיים להקליד
+    if (!strict) {
+        if (ISRAEL_CITY_SET.has(city)) {
+            return { isValid: true, message: '', status: 'valid' };
+        }
+        return { isValid: false, message: 'בחר/י עיר בישראל מהרשימה', status: 'warning' };
+    }
+    
+    // מצב "שליחה" (strict): חייב התאמה מלאה לרשימה
+    if (!ISRAEL_CITY_SET.has(city)) {
+        return { isValid: false, message: 'נא לבחור עיר בישראל מהרשימה', status: 'invalid' };
     }
     
     return { isValid: true, message: '', status: 'valid' };
@@ -465,7 +543,7 @@ function validateFieldRealTime(fieldId) {
     if (fieldId === 'health-fund-select') {
         validation = validateHealthFund(value);
     } else if (fieldId === 'user-location-input') {
-        validation = validateLocation(value);
+        validation = validateLocation(value, { strict: false });
     } else {
         return;
     }
@@ -629,6 +707,9 @@ function initWelcomeModal() {
     const overlay = modal.querySelector('.modal-overlay');
     const healthFundSelect = document.getElementById('health-fund-select');
     const locationInput = document.getElementById('user-location-input');
+
+    // יצירת datalist לערים בישראל (לשדה העיר)
+    ensureIsraelCitiesDatalist();
     
     // טיפול בשליחת טופס
     if (form) {
@@ -698,6 +779,31 @@ function initWelcomeModal() {
     console.log('✅ מודאל פתיחה מוכן');
 }
 
+function ensureIsraelCitiesDatalist() {
+    // הדפדפן יציג הצעות לערים; בנוסף, הוולידציה תוודא שנבחרה עיר מהרשימה
+    const input = document.getElementById('user-location-input');
+    if (!input) return;
+    
+    const datalistId = input.getAttribute('list') || 'israel-cities';
+    if (!datalistId) return;
+    
+    let datalist = document.getElementById(datalistId);
+    if (!datalist) {
+        datalist = document.createElement('datalist');
+        datalist.id = datalistId;
+        document.body.appendChild(datalist);
+    }
+    
+    // מילוי חד-פעמי
+    if (datalist.childElementCount === 0) {
+        ISRAEL_CITIES.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            datalist.appendChild(option);
+        });
+    }
+}
+
 function showWelcomeModal() {
     const modal = document.getElementById('welcome-modal');
     if (!modal) return;
@@ -739,7 +845,7 @@ function handleWelcomeFormSubmit() {
     }
     
     // בדיקת מיקום
-    const locationValidation = validateLocation(locationInput?.value || '');
+    const locationValidation = validateLocation(locationInput?.value || '', { strict: true });
     if (!locationValidation.isValid) {
         isValid = false;
         updateFieldStatus('user-location-input', false, locationValidation.message, locationValidation.status);
