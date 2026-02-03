@@ -29,6 +29,9 @@ const SPECIALTIES = [
 const DOCTOR_FIRST_NAMES = ["יעל", "דוד", "שרה", "מיכל", "אורית", "אמנון", "רננה", "רון", "נועם", "ליאור", "דני", "רונית", "עמית", "טל", "ניר", "דנה", "יוסי", "מירי", "גיל", "עינת"];
 const DOCTOR_LAST_NAMES = ["כהן", "לוי", "רוזן", "ישראלי", "בן דוד", "דוד", "שמיר", "גולן", "אברהם", "לוי", "מזרחי", "ברק", "פלד", "דהן", "קדוש", "עזרא", "חדד", "סלע", "בכר", "מנדל"];
 
+// כמה רופאים ליצור לכל עיר × התמחות (משפיע על כמות הרופאים בכל אזור)
+const DOCTORS_PER_SPECIALTY_PER_CITY = 3;
+
 // רשימת ערים בישראל — למודאל פתיחה ולבניית רופאים (לכל עיר × כל התמחות)
 const ISRAEL_CITIES = [
     'תל אביב', 'ירושלים', 'חיפה', 'באר שבע', 'ראשון לציון', 'פתח תקווה', 'נתניה', 'אשדוד', 'אשקלון',
@@ -68,29 +71,33 @@ function buildDoctorsData() {
         const areaCode = getAreaCode(city);
         for (let s = 0; s < SPECIALTIES.length; s++) {
             const spec = SPECIALTIES[s];
-            const first = DOCTOR_FIRST_NAMES[(id - 1) % DOCTOR_FIRST_NAMES.length];
-            const last = DOCTOR_LAST_NAMES[(id - 1) % DOCTOR_LAST_NAMES.length];
-            const years = 6 + (id % 20);
-            const healthFund = HEALTH_FUNDS[(id - 1) % HEALTH_FUNDS.length];
-            data.push({
-                id,
-                name: `ד\"ר ${first} ${last}`,
-                specialty: spec.specialty,
-                city,
-                healthFund,
-                clinic: `מרפאת ${spec.specialty} - ${city}`,
-                phone: `${areaCode}-${String(5000000 + id).slice(0, 7)}`,
-                tags: [...spec.tags, city, healthFund],
-                experience: `${years} שנות ניסיון`,
-                description: spec.description,
-                avatar: null,
-                rating: Math.round((4.2 + (id % 80) / 100) * 10) / 10,
-                reviewsCount: 40 + (id % 180),
-                availability: "available_now",
-                isRecommended: id % 4 === 0,
-                isNew: id % 12 === 0
-            });
-            id++;
+
+            // יוצרים כמה רופאים לכל התמחות בעיר כדי להבטיח כמות מספקת לכל אזור
+            for (let n = 0; n < DOCTORS_PER_SPECIALTY_PER_CITY; n++) {
+                const first = DOCTOR_FIRST_NAMES[(id - 1) % DOCTOR_FIRST_NAMES.length];
+                const last = DOCTOR_LAST_NAMES[(id - 1) % DOCTOR_LAST_NAMES.length];
+                const years = 6 + (id % 20);
+                const healthFund = HEALTH_FUNDS[(id - 1) % HEALTH_FUNDS.length];
+                data.push({
+                    id,
+                    name: `ד\"ר ${first} ${last}`,
+                    specialty: spec.specialty,
+                    city,
+                    healthFund,
+                    clinic: `מרפאת ${spec.specialty} - ${city}`,
+                    phone: `${areaCode}-${String(5000000 + id).slice(0, 7)}`,
+                    tags: [...spec.tags, city, healthFund],
+                    experience: `${years} שנות ניסיון`,
+                    description: spec.description,
+                    avatar: null,
+                    rating: Math.round((4.2 + (id % 80) / 100) * 10) / 10,
+                    reviewsCount: 40 + (id % 180),
+                    availability: "available_now",
+                    isRecommended: id % 4 === 0,
+                    isNew: id % 12 === 0
+                });
+                id++;
+            }
         }
     }
     return data;
