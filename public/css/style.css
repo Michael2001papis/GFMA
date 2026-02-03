@@ -335,6 +335,36 @@ a:hover {
     width: 80%;
 }
 
+/* Update User Button (בהדר — אחרי ברוכים הבאים) */
+.update-user-btn-wrapper {
+    display: flex;
+    align-items: center;
+    margin-left: 0.75rem;
+}
+
+.btn-update-user {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--bg-pure-white);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: var(--transition-smooth);
+    white-space: nowrap;
+}
+
+.btn-update-user:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-update-user:focus {
+    outline: 2px solid var(--miki-turquoise);
+    outline-offset: 2px;
+}
+
 /* Theme Toggle Button */
 .theme-toggle {
     background: rgba(255, 255, 255, 0.1);

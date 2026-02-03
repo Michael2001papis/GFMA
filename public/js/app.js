@@ -373,14 +373,19 @@ function initApp() {
     
     // בדיקה אם צריך להציג מודאל
     if (!userState.userType) {
-        // אין מידע משתמש - הצגת מודאל
         showWelcomeModal();
     } else {
-        // יש מידע משתמש - המשך רגיל
         showSection('home');
+        updateUpdateUserButtonVisibility();
     }
     
     console.log('✅ האפליקציה מוכנה!');
+}
+
+function updateUpdateUserButtonVisibility() {
+    const wrapper = document.getElementById('update-user-btn-wrapper');
+    if (!wrapper) return;
+    wrapper.style.display = userState.userType ? 'flex' : 'none';
 }
 
 // ============================================
@@ -733,6 +738,14 @@ function initWelcomeModal() {
         });
     }
     
+    // כפתור עדכן משתמש (בהדר)
+    const updateUserBtn = document.getElementById('update-user-btn');
+    if (updateUserBtn) {
+        updateUserBtn.addEventListener('click', () => {
+            showWelcomeModal(true);
+        });
+    }
+    
     // סגירה בלחיצה על overlay
     if (overlay) {
         overlay.addEventListener('click', (e) => {
@@ -804,14 +817,25 @@ function ensureIsraelCitiesDatalist() {
     }
 }
 
-function showWelcomeModal() {
+function showWelcomeModal(forEdit) {
     const modal = document.getElementById('welcome-modal');
     if (!modal) return;
     
-    // טעינת טיוטה אם קיימת
-    loadModalDraft();
+    const healthFundSelect = document.getElementById('health-fund-select');
+    const locationInput = document.getElementById('user-location-input');
     
-    // הצגה עם אנימציה
+    if (forEdit && userState.userType === 'registered') {
+        // פתיחה לעדכון: מילוי מהמצב השמור
+        if (healthFundSelect && userState.healthFund) healthFundSelect.value = userState.healthFund;
+        if (locationInput && userState.userLocation) locationInput.value = userState.userLocation;
+        validateFieldRealTime('health-fund-select');
+        validateFieldRealTime('user-location-input');
+    } else if (!forEdit) {
+        // פתיחה רגילה: טעינת טיוטה אם קיימת
+        loadModalDraft();
+    }
+    // אורח (guest) בעדכון: שדות ריקים, יכול למלא ולהירשם
+    
     showModalWithAnimation();
 }
 
@@ -879,14 +903,11 @@ function handleWelcomeFormSubmit() {
     
     // סגירת מודאל עם אנימציה
     hideModalWithAnimation(() => {
-        // מעבר לדף הבית
+        updateUpdateUserButtonVisibility();
         showSection('home');
-        
-        // עדכון רשימת הרופאים (אם כבר במודול הרופאים)
         if (document.getElementById('doctors').classList.contains('active')) {
-            handleDoctorsSearch(); // עדכון החיפוש עם הסינון החדש
+            handleDoctorsSearch();
         }
-        
         showToast('✅ הנתונים נשמרו! החיפוש מותאם לאזור שלך.', 'success');
     });
 }
@@ -906,9 +927,8 @@ function handleSkipAsGuest() {
     
     // סגירת מודאל עם אנימציה
     hideModalWithAnimation(() => {
-        // מעבר לדף הבית
+        updateUpdateUserButtonVisibility();
         showSection('home');
-        
         showToast('👋 המשך כאורח - החיפוש יהיה כללי לכל הארץ.', 'info');
     });
 }
