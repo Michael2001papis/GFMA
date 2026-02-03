@@ -1538,7 +1538,7 @@ function getAvailabilityText(availability) {
         case 'available_in_3_days':
             return 'תור זמין בעוד 3 ימים';
         default:
-            return 'זמינות לא זמינה';
+            return 'אין מידע על זמינות';
     }
 }
 
@@ -1944,7 +1944,7 @@ const chatIntents = [
         examples: [
             "איך אני מוצא רופא?",
             "יש רופאים בעיר שלי?",
-            "איך רואה פרטים מלאים של רופא?",
+            "איך רואים פרטים מלאים של רופא?",
             "איך מחפשים רופא ילדים?",
             "איפה רואים רופאים?"
         ],
