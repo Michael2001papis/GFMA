@@ -66,17 +66,17 @@
                         עיר *
                     </label>
                     <div class="field-wrapper">
-                        <input 
-                            type="text" 
+                        <select 
                             id="user-location-input" 
                             name="userLocation" 
-                            placeholder="בחר/י עיר בישראל (למשל: תל אביב, ירושלים, חיפה...)"
                             required
                             aria-required="true"
                             aria-describedby="error-user-location hint-user-location"
                             autocomplete="address-level2"
-                            list="israel-cities"
                         >
+                            <option value="">בחר עיר בישראל</option>
+                            <!-- אפשרויות הערים נטענות מ-JS (ISRAEL_CITIES) -->
+                        </select>
                         <span class="status-icon" id="status-user-location" aria-hidden="true"></span>
                     </div>
                     <span class="field-hint" id="hint-user-location"></span>

@@ -40,6 +40,9 @@ const ISRAEL_CITIES = [
 ];
 const ISRAEL_CITY_SET = new Set(ISRAEL_CITIES);
 
+// קופות חולים — להתאמת רופאים למשתמש
+const HEALTH_FUNDS = ["כללית", "מכבי", "מאוחדת", "לאומית", "אין קופת חולים / פרטי"];
+
 function getAreaCode(city) {
     const codes = {
         "תל אביב": "03", "ירושלים": "02", "חיפה": "04", "באר שבע": "08", "ראשון לציון": "03", "פתח תקווה": "03", "נתניה": "09",
@@ -68,14 +71,16 @@ function buildDoctorsData() {
             const first = DOCTOR_FIRST_NAMES[(id - 1) % DOCTOR_FIRST_NAMES.length];
             const last = DOCTOR_LAST_NAMES[(id - 1) % DOCTOR_LAST_NAMES.length];
             const years = 6 + (id % 20);
+            const healthFund = HEALTH_FUNDS[(id - 1) % HEALTH_FUNDS.length];
             data.push({
                 id,
                 name: `ד\"ר ${first} ${last}`,
                 specialty: spec.specialty,
                 city,
+                healthFund,
                 clinic: `מרפאת ${spec.specialty} - ${city}`,
                 phone: `${areaCode}-${String(5000000 + id).slice(0, 7)}`,
-                tags: [...spec.tags, city],
+                tags: [...spec.tags, city, healthFund],
                 experience: `${years} שנות ניסיון`,
                 description: spec.description,
                 avatar: null,
@@ -409,25 +414,16 @@ function validateHealthFund(value) {
     return { isValid: true, message: '', status: 'valid' };
 }
 
-// ולידציה בזמן אמת - מיקום
+// ולידציה בזמן אמת - מיקום (select: עיר בישראל)
 function validateLocation(value, { strict = false } = {}) {
     const city = (value || '').trim();
     
     if (!city) {
-        return { isValid: false, message: 'נא לבחור עיר', status: 'warning' };
+        return { isValid: false, message: 'נא לבחור עיר בישראל', status: 'warning' };
     }
     
-    // מצב בזמן הקלדה: לא מציגים "שגיאה אדומה" לפני שהמשתמש סיים להקליד
-    if (!strict) {
-        if (ISRAEL_CITY_SET.has(city)) {
-            return { isValid: true, message: '', status: 'valid' };
-        }
-        return { isValid: false, message: 'בחר/י עיר בישראל מהרשימה', status: 'warning' };
-    }
-    
-    // מצב "שליחה" (strict): חייב התאמה מלאה לרשימה
     if (!ISRAEL_CITY_SET.has(city)) {
-        return { isValid: false, message: 'נא לבחור עיר בישראל מהרשימה', status: 'invalid' };
+        return { isValid: false, message: 'נא לבחור עיר מהרשימה', status: strict ? 'invalid' : 'warning' };
     }
     
     return { isValid: true, message: '', status: 'valid' };
@@ -609,8 +605,8 @@ function initWelcomeModal() {
     const healthFundSelect = document.getElementById('health-fund-select');
     const locationInput = document.getElementById('user-location-input');
 
-    // יצירת datalist לערים בישראל (לשדה העיר)
-    ensureIsraelCitiesDatalist();
+    // מילוי רשימת ערים בישראל ב-select
+    ensureCitySelectOptions();
     
     // טיפול בשליחת טופס
     if (form) {
@@ -666,20 +662,14 @@ function initWelcomeModal() {
         });
     }
     
-    // ולידציה בזמן אמת - מיקום
+    // ולידציה בזמן אמת - מיקום (select)
     if (locationInput) {
-        locationInput.addEventListener('input', () => {
+        locationInput.addEventListener('change', () => {
             validateFieldRealTime('user-location-input');
-            // שמירת טיוטה עם debounce
             clearTimeout(modalDraftTimer);
-            modalDraftTimer = setTimeout(() => {
-                saveModalDraft();
-            }, 500);
+            modalDraftTimer = setTimeout(() => saveModalDraft(), 500);
         });
-        
-        locationInput.addEventListener('blur', () => {
-            validateFieldRealTime('user-location-input');
-        });
+        locationInput.addEventListener('blur', () => validateFieldRealTime('user-location-input'));
     }
     
     // תמיכה ב-ESC
@@ -688,27 +678,17 @@ function initWelcomeModal() {
     console.log('✅ מודאל פתיחה מוכן');
 }
 
-function ensureIsraelCitiesDatalist() {
-    // הדפדפן יציג הצעות לערים; בנוסף, הוולידציה תוודא שנבחרה עיר מהרשימה
-    const input = document.getElementById('user-location-input');
-    if (!input) return;
+function ensureCitySelectOptions() {
+    const select = document.getElementById('user-location-input');
+    if (!select || select.tagName !== 'SELECT') return;
     
-    const datalistId = input.getAttribute('list') || 'israel-cities';
-    if (!datalistId) return;
-    
-    let datalist = document.getElementById(datalistId);
-    if (!datalist) {
-        datalist = document.createElement('datalist');
-        datalist.id = datalistId;
-        document.body.appendChild(datalist);
-    }
-    
-    // מילוי חד-פעמי
-    if (datalist.childElementCount === 0) {
+    // מילוי חד-פעמי: רק אם יש עדיין רק אופציית "בחר עיר"
+    if (select.options.length <= 1) {
         ISRAEL_CITIES.forEach(city => {
             const option = document.createElement('option');
             option.value = city;
-            datalist.appendChild(option);
+            option.textContent = city;
+            select.appendChild(option);
         });
     }
 }
@@ -1042,6 +1022,11 @@ function showSection(sectionName) {
             }
         });
         
+        // בעת מעבר לרופאים — רענון הרשימה לפי עיר וקופת חולים
+        if (sectionName === 'doctors' && typeof handleDoctorsSearch === 'function') {
+            handleDoctorsSearch();
+        }
+        
         // גלילה למעלה
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1359,12 +1344,17 @@ function filterDoctors(searchTerm) {
         const locationLower = userState.userLocation.toLowerCase().trim();
         doctors = doctors.filter(doctor => {
             if (!doctor.city) return false;
-            // בדיקה אם העיר של הרופא מתאימה למיקום המשתמש
             return doctor.city.toLowerCase().includes(locationLower) || 
                    locationLower.includes(doctor.city.toLowerCase());
         });
-        
         console.log(`📍 סונן לפי מיקום "${userState.userLocation}": ${doctors.length} רופאים`);
+    }
+    
+    // סינון לפי קופת חולים (אם משתמש רשום ובחר קופה)
+    if (userState.userType === 'registered' && userState.healthFund) {
+        const before = doctors.length;
+        doctors = doctors.filter(doctor => doctor.healthFund === userState.healthFund);
+        console.log(`🏥 סונן לפי קופת חולים "${userState.healthFund}": ${doctors.length} רופאים`);
     }
     
     // אם החיפוש ריק - החזרת הרופאים המסוננים (עם או בלי מיקום)
@@ -1685,6 +1675,12 @@ function createDoctorCard(doctor) {
                 <div class="doctor-meta-item">
                     <span class="doctor-meta-icon">📍</span>
                     <span class="doctor-meta-text">${escapeHtml(doctor.city)}</span>
+                </div>
+            ` : ''}
+            ${doctor.healthFund ? `
+                <div class="doctor-meta-item">
+                    <span class="doctor-meta-icon">🏥</span>
+                    <span class="doctor-meta-text">${escapeHtml(doctor.healthFund)}</span>
                 </div>
             ` : ''}
             <div class="doctor-meta-item">
